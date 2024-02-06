@@ -46,7 +46,7 @@ You can create a standalone executable of this script for easy distribution and 
 1. Run the build script:
 
    ```bash
-   python build.py
+   poetry run python bricscad_version_checker\\build.py
 
    ```
 
