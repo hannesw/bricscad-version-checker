@@ -14,6 +14,7 @@ if USE_GUI:
 HOME_DIR = os.path.expanduser("~")
 FILE_PATH = os.path.join(HOME_DIR, 'bricscad_version.json')
 
+
 def get_system_locale():
     # Get the system's locale, e.g., 'de_DE'
     loc = locale.getlocale()[0]
@@ -30,11 +31,19 @@ def fetch_version_from_web():
     response = requests.get(url)
 
     soup = BeautifulSoup(response.text, 'html.parser')
-    version_tag = soup.find('h1', class_='version')
+
+    # save html to temporary file for debugging
+    with open('temp.html', 'w') as file:
+        file.write(soup.prettify())
+    version_tag = soup.find('h1')
+
     if version_tag:
-        return version_tag.text.strip()
+        version_tag = version_tag.text.strip().strip("Version ")
+        return version_tag
     else:
-        raise Exception("Couldn't find the version information on the webpage.")
+        raise Exception(
+            "Couldn't find the version information on the webpage.")
+
 
 def read_stored_version():
     if os.path.exists(FILE_PATH):
@@ -43,9 +52,11 @@ def read_stored_version():
             return data['version']
     return None
 
+
 def write_version_to_disk(version):
     with open(FILE_PATH, 'w') as file:
         json.dump({'version': version}, file)
+
 
 def main():
     parser = argparse.ArgumentParser(description="Bricscad Version Checker")
@@ -59,11 +70,14 @@ def main():
     if stored_version is None or args.show_always:
         write_version_to_disk(web_version)
         if USE_GUI:
-            messagebox.showinfo('Bricscad Version', f'The current Bricscad version is: {web_version}. Stored to disk.')
+            messagebox.showinfo(
+                'Bricscad Version', f'The current Bricscad version is: {web_version}. Stored to disk.')
     elif stored_version != web_version:
         write_version_to_disk(web_version)
         if USE_GUI:
-            messagebox.showinfo('Bricscad Version', f'Bricscad version has changed from {stored_version} to {web_version}. Updated on disk.')
+            messagebox.showinfo(
+                'Bricscad Version', f'Bricscad version has changed from {stored_version} to {web_version}. Updated on disk.')
+
 
 if __name__ == '__main__':
     main()
